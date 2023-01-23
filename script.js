@@ -1,14 +1,14 @@
 const gameBoardDiv = document.querySelector('[data-game-board]');
 
-const GameBoard = { 
-    boardPositions: [
+const GameBoard = (() => { 
+    const boardPositions = [
         {
             position: 'row-1-col-1',
-            occupied: '&#10005;'
+            occupied: null
         },
         {
             position: 'row-1-col-2',
-            occupied: '&#9711;'
+            occupied: null
         },
         {
             position: 'row-1-col-3',
@@ -38,19 +38,39 @@ const GameBoard = {
             position: 'row-3-col-3',
             occupied: null
         }]
+
+        const display = (() => {
+            boardPositions.forEach(field => {
+                const boardField = document.createElement('div');
+                boardField.dataset.position = field.position;
+                boardField.classList.add('field');
+                boardField.innerHTML = field.occupied;
+                gameBoardDiv.appendChild(boardField)
+            })
+        })();
+
+        const gameField = document.querySelectorAll('.field');
+
+        return {
+            boardPositions,
+            display,
+            gameField
+        } 
+})();
+
+const Player = (name, mark) => {
+    return { name, mark }
 };
 
-function displayGameBoard () {
+const gameController = () => {
+    const firstPlayer = Player('Player1', 'X');
+    const secondPlayer = Player('Player2', 'O');
 
-    const board = GameBoard.boardPositions;
-
-    board.forEach(field => {
-        const boardField = document.createElement('div');
-        boardField.classList.add(field.position);
-        boardField.classList.add('field');
-        boardField.innerHTML = field.occupied;
-        gameBoardDiv.appendChild(boardField)
-    })
 }
 
-displayGameBoard();
+
+GameBoard.gameField.forEach(field => {
+    field.addEventListener('click', ()  => {
+        field.innerHTML = 'X'
+    })
+});
