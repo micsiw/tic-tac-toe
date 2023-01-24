@@ -1,4 +1,5 @@
 const gameBoardDiv = document.querySelector('[data-game-board]');
+const announcerDiv = document.querySelector('[data-game-announcer]');
 
 const GameBoard = (() => { 
     const boardPositions = [
@@ -39,7 +40,7 @@ const GameBoard = (() => {
             occupied: null
         }]
 
-        function display() {
+        function displayGrid() {
             boardPositions.forEach(field => {
                 const boardField = document.createElement('div');
                 boardField.dataset.position = field.position;
@@ -47,16 +48,33 @@ const GameBoard = (() => {
                 boardField.innerHTML = field.occupied;
                 gameBoardDiv.appendChild(boardField)
             })
-        };
 
-        display();
+            const gameField = document.querySelectorAll('.field');
 
-        const gameField = document.querySelectorAll('.field');
+            gameField.forEach(field => {
+                field.addEventListener('click', (event)  => {
+                    if (GameStart.wonPlayer === null) {
+                        GameStart.playerAction(event.target);
+                        GameStart.isOver();
+                    }
+                })
+            });
+        }
+
+        displayGrid();
+
+        function resetGrid() {
+            gameBoardDiv.innerHTML = '';
+            boardPositions.forEach(position => {
+                position.occupied = null;
+            })
+            GameStart.wonPlayer = null;
+            displayGrid();
+        }
 
         return {
             boardPositions,
-            display,
-            gameField
+            resetGrid
         } 
 })();
 
@@ -64,7 +82,7 @@ const Player = (name, mark) => {
     return { name, mark }
 };
 
-const gameStart = (() => {
+const GameStart = (() => {
 
     const firstPlayer = Player('Player1', 'X');
     const secondPlayer = Player('Player2', 'O');
@@ -74,6 +92,7 @@ const gameStart = (() => {
     ];
 
     let actualPlayer = firstPlayer;
+    let wonPlayer = null;
 
     function playerAction(event) {
         const fieldIndex = GameBoard.boardPositions.findIndex(field => field.position === event.dataset.position);
@@ -88,22 +107,36 @@ const gameStart = (() => {
         } else {
             actualPlayer = firstPlayer;
         }
-        console.log(fieldIndex)
-        console.log(GameBoard.boardPositions[fieldIndex].occupied)
-        console.log(event)
+    }
+
+    function isOver () {
+
+        winningCombinations.forEach(combination => {
+
+            let checkMarks = [];
+
+            combination.forEach(index => {
+                checkMarks.push(GameBoard.boardPositions[index].occupied)
+            })
+
+            if (checkMarks[0] !== null && checkMarks[0] === checkMarks[1]) {
+                if (checkMarks[1] !== null && checkMarks[1] === checkMarks[2]) {
+                    if (checkMarks[0] === 'X') {
+                        GameStart.wonPlayer = firstPlayer;
+                        console.log('PLAYER X WON')
+                    } else {
+                        GameStart.wonPlayer = secondPlayer;
+                        console.log('PLAYER O WON')
+                    }
+                }
+            }
+
+        })
     }
 
 
 
-    return { playerAction }
+    return { playerAction, isOver, wonPlayer }
 
     
 })();
-
-
-GameBoard.gameField.forEach(field => {
-    field.addEventListener('click', (event)  => {
-        gameStart.playerAction(event.target);
-
-    })
-});
